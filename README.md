@@ -17,53 +17,48 @@ An academic Theory of Computation system and developer platform for deterministi
 [![Monaco Editor](https://img.shields.io/badge/Monaco_Editor-0.57-1E1E1E?style=flat-square&logo=visualstudiocode&logoColor=white)](https://microsoft.github.io/monaco-editor/)
 [![Vitest](https://img.shields.io/badge/Tested_with-Vitest-6E9F18?style=flat-square&logo=vitest&logoColor=white)](https://vitest.dev/)
 [![Google Gemini](https://img.shields.io/badge/Gemini_API-3.8_Flash-8E75B2?style=flat-square&logo=googlegemini&logoColor=white)](https://ai.google.dev/)
-[![Status](https://img.shields.io/badge/Status-Active_Development-success?style=flat-square)]()
-
-<br />
-
-[Explore Architecture](#how-it-works) • [Theory Foundations](#theory-of-computation-foundations) • [Benchmark Lab](#testing-and-evaluation) • [Getting Started](#installation-and-setup)
 
 </div>
 
 ---
 
-## Table of Contents
+## Overview
 
-- [Overview](#overview)
-- [Key Features](#key-features)
-- [How It Works](#how-it-works)
-- [Theory of Computation Foundations](#theory-of-computation-foundations)
-- [Supported Repair Categories & Scope](#supported-repair-categories--scope)
-- [Deterministic Ranking Formula](#deterministic-ranking-formula)
-- [Example Walkthrough](#example-walkthrough)
-- [Technology Stack](#technology-stack)
-- [Project Structure](#project-structure)
-- [Installation and Setup](#installation-and-setup)
-- [Configuration](#configuration)
-- [Testing and Evaluation](#testing-and-evaluation)
-- [Application Preview & Views](#application-preview--views)
-- [Verification Boundaries & Limitations](#verification-boundaries--limitations)
-- [Roadmap & Future Scope](#roadmap--future-scope)
-- [Contributing](#contributing)
-- [License](#license)
+Traditional LLM coding assistants generate program repairs through **unconstrained probabilistic token generation**. While effective for general synthesis, generative models frequently invent nonexistent identifiers, hallucinate syntax variants, introduce cascading syntax errors, or silently alter execution semantics.
+
+**GrammarGuard AI** frames syntax repair as a **grammar-constrained search** over formal language productions:
+
+- **Deterministic Parser Frontend:** Runs Python standard library `ast.parse` and `tokenize` in a zero-execution sandbox to extract exact diagnostic offsets.
+- **Bounded Candidate Generation:** Generates localized candidate repairs strictly within formal delimiter, sequence separator, and expression boundary rules.
+- **Hard Compiler Filtering:** Every candidate repair is re-parsed by the real Python compiler AST parser. Any draft that fails compilation is **immediately rejected**.
+- **Deterministic Ranking:** Validated candidates are scored from 0 to 100 using a transparent mathematical formula based on Token Levenshtein edit distance, error proximity, and code preservation.
+- **Grounded Explanations:** Explanations (via Google Gemini 3.8 Flash or deterministic rule fallback) are strictly constrained to verified compiler diagnostic facts.
+
+> [!IMPORTANT]
+> **Core Principle: Syntax Validity &ne; Semantic Correctness**  
+> In formal language theory, compiler acceptance proves only that a program string belongs to the language defined by the grammar ($P \in L(G)$). Syntax acceptance **does not** prove semantic correctness, algorithmic intent, or test suite satisfaction ($P \models \text{Spec}$). GrammarGuard AI explicitly labels this boundary across all views.
 
 ---
 
-## Overview
+## Table of Contents
 
-Traditional LLM-based coding assistants generate program repairs through **unconstrained probabilistic token generation**. While effective for general synthesis, generative models frequently invent nonexistent identifiers, hallucinate syntax variants, introduce cascading syntax errors, or silently alter execution semantics.
-
-**GrammarGuard AI** approaches syntax repair as a **grammar-constrained search** over formal language productions:
-
-1. **Deterministic Parser Frontend:** Runs Python's standard library `ast.parse` and `tokenize` in a zero-execution sandbox to extract exact diagnostic offsets and expected tokens.
-2. **Bounded Candidate Generation:** Generates localized candidate repairs strictly within formal delimiter, sequence separator, and expression boundary rules.
-3. **Hard Compiler Filtering:** Every candidate repair is passed back through the Python compiler AST parser. Any draft that fails compilation is **immediately rejected**.
-4. **Deterministic Ranking:** Validated candidates are scored from $0$ to $100$ using a transparent mathematical formula based on Token Levenshtein edit distance, error proximity, and code preservation.
-5. **Grounded Pedagogical Explanations:** Explanations (via Google Gemini 3.8 Flash or deterministic rule fallback) are strictly constrained by verified compiler diagnostic facts.
-
-> [!IMPORTANT]
-> **Core Principle: Syntax Validity $\neq$ Semantic Correctness**  
-> In formal language theory, compiler acceptance proves only that a program string belongs to the language defined by the grammar: $P \in L(G)$. Syntax acceptance **does not** prove semantic correctness, algorithmic intent, or test suite satisfaction ($P \models \text{Spec}$). GrammarGuard AI explicitly labels this boundary across all views.
+- [Key Features](#key-features)
+- [Architecture & Processing Pipeline](#architecture--processing-pipeline)
+- [How the Repair Pipeline Works](#how-the-repair-pipeline-works)
+- [Theory of Computation Foundations](#theory-of-computation-foundations)
+- [Supported Repair Categories & Boundaries](#supported-repair-categories--boundaries)
+- [Deterministic Ranking Formula](#deterministic-ranking-formula)
+- [Technology Stack](#technology-stack)
+- [Installation and Setup](#installation-and-setup)
+- [Configuration](#configuration)
+- [Usage Example](#usage-example)
+- [Testing and Evaluation](#testing-and-evaluation)
+- [Application Views Overview](#application-views-overview)
+- [Verification Boundaries & Limitations](#verification-boundaries--limitations)
+- [Project Structure](#project-structure)
+- [Roadmap & Future Improvements](#roadmap--future-improvements)
+- [Contributing](#contributing)
+- [License](#license)
 
 ---
 
@@ -72,31 +67,31 @@ Traditional LLM-based coding assistants generate program repairs through **uncon
 <table>
   <tr>
     <td width="50%">
-      <h3>🛡️ Interactive Python Workspace</h3>
+      <h3>Interactive Python Workspace</h3>
       <p>Real-time code editor powered by Monaco Editor with syntax highlighting, live AST diagnostic markers, character/token offset tracking, and instant parser feedback.</p>
     </td>
     <td width="50%">
-      <h3>⚖️ Deterministic Repair Engine</h3>
+      <h3>Deterministic Repair Engine</h3>
       <p>Generates targeted candidate repairs for missing delimiters, missing separators, and dangling operators without guessing arbitrary variables.</p>
     </td>
   </tr>
   <tr>
     <td width="50%">
-      <h3>🔍 Side-by-Side Diff Inspector</h3>
+      <h3>Side-by-Side Diff Inspector</h3>
       <p>Integrated Monaco Diff Editor illustrating precise token insertions and deletions with component-level score breakdowns and ranking metrics.</p>
     </td>
     <td width="50%">
-      <h3>🎓 Theory of Computation Explorer</h3>
+      <h3>Theory of Computation Explorer</h3>
       <p>Interactive educational grammar sandbox with custom lexical tokenization, recursive-descent parse trees, leftmost step-by-step derivations, and operator precedence analysis.</p>
     </td>
   </tr>
   <tr>
     <td width="50%">
-      <h3>📊 Evaluation Lab & Benchmarks</h3>
+      <h3>Evaluation Lab & Benchmarks</h3>
       <p>Reproducible empirical evaluation suite with curated and synthetic test cases calculating accuracy, false-positive resistance, rejection rates, and average edit distance.</p>
     </td>
     <td width="50%">
-      <h3>🔒 Privacy-First Architecture</h3>
+      <h3>Privacy-First Architecture</h3>
       <p>Zero arbitrary code execution. Server-side API key isolation. Optional raw source retention in local history (defaults to SHA-256 hashes and compiler diagnostics only).</p>
     </td>
   </tr>
@@ -104,36 +99,39 @@ Traditional LLM-based coding assistants generate program repairs through **uncon
 
 ---
 
-## How It Works
+## Architecture & Processing Pipeline
 
-GrammarGuard AI decouples syntax candidate generation and independent verification from AI explanation. The candidate generation and ranking engine is **100% deterministic and compiler-verified**.
+GrammarGuard AI completely decouples deterministic compiler verification from optional AI explanations. Candidate repair generation and ranking operate entirely without LLM dependencies.
 
 ```mermaid
 flowchart TD
-    A[Python Source Code] --> B[1. Deterministic AST Parser Adapter]
-    B --> C{Parse Succeeded?}
-    C -- Yes --> D[Report Syntax Valid $P \in L(G)$]
-    C -- No --> E[2. Diagnostic Extraction & Classification]
+    A["Python Source Code"] --> B["1. Deterministic AST Parser Adapter"]
+    B --> C{"Syntax Valid?"}
+    C -->|Yes| D["Report Syntax Valid"]
+    C -->|No| E["2. Diagnostic Extraction & Classification"]
     
-    E --> F{Eligible Category?}
-    F -- No --> G[Withhold Automatic Repair & Report Limitations]
-    F -- Yes --> H[3. Bounded Candidate Generation]
+    E --> F{"Repair Supported?"}
+    F -->|No| G["Report Limitation & Withhold Automatic Edits"]
+    F -->|Yes| H["3. Bounded Candidate Generation"]
     
-    H --> I[Draft Candidates]
-    I --> J[4. Independent Compiler Validation ast.parse]
+    H --> I["Generate Candidate Drafts"]
+    I --> J["4. Independent Compiler Validation (ast.parse)"]
     
-    J -- Failed ast.parse --> K[Safely Rejected Candidates]
-    J -- Passed ast.parse --> L[Validated Candidates]
+    J --> K{"Candidate Passes ast.parse?"}
+    K -->|No| L["Reject Candidate Draft"]
+    K -->|Yes| M["5. Deterministic Multi-Factor Ranking"]
     
-    L --> M[5. Deterministic Multi-Factor Ranking]
-    M --> N[6. Top-Ranked Candidate Selection]
-    
-    N --> O[7. Grounded Pedagogical Explanation]
-    O --> P[Gemini 3.8 Flash / Rule Fallback]
-    P --> Q[Monaco Workspace & Diff Inspector]
+    M --> N["Ranked Valid Candidates (0-100 Score)"]
+    N --> O["6. Grounded Pedagogical Explanation"]
+    O --> P["Gemini 3.8 Flash / Rule Fallback"]
+    P --> Q["Workspace & Diff Inspector View"]
 ```
 
-### The 6-Stage Pipeline
+---
+
+## How the Repair Pipeline Works
+
+The system executes a deterministic 6-stage pipeline:
 
 1. **Deterministic Syntax Analysis:**  
    The source is dispatched to a Python worker process executing `ast.parse()` and `tokenize.tokenize()`. Arbitrary user code is never run.
@@ -145,9 +143,9 @@ flowchart TD
    - `R-SEP`: Inserts missing comma separators (`,`) between adjacent literals/expressions in collections.
    - `R-EXPR`: Trims trailing dangling binary operators (`+`, `-`, `*`, `/`) to restore valid expressions without speculative operand hallucination.
 4. **Independent Hard Compiler Validation:**  
-   Every generated candidate string is re-parsed independently with `ast.parse()`. Any candidate that produces a syntax error is **rejected**.
+   Every generated candidate string is re-parsed independently with `ast.parse()`. Any candidate that fails compilation is **rejected immediately**.
 5. **Deterministic Ranking:**  
-   Valid candidates are scored on a scale of $0$ to $100$ using exact dynamic-programming token edit distance and spatial proximity.
+   Valid candidates are scored on a scale of 0 to 100 using exact dynamic-programming token edit distance, spatial proximity, and preservation ratio.
 6. **Fact-Grounded Explanation:**  
    The verified diagnostic payload is provided to Google Gemini 3.8 Flash to explain the formal CFG production rule violation in pedagogical terms. If the API key is absent, it seamlessly falls back to a deterministic rule-based explainer.
 
@@ -160,7 +158,7 @@ GrammarGuard AI connects academic Theory of Computation concepts to real-world c
 ### 1. Context-Free Grammars (CFGs)
 A program $P$ is syntactically valid if and only if $P \in L(G)$, where $L(G)$ is the formal language recognized by the grammar $G = (V, \Sigma, R, S)$.
 
-### 2. Built-in Teaching Grammar
+### 2. Educational Teaching Grammar vs. Python Grammar
 The application contains an isolated educational arithmetic grammar module (`src/grammar/teachingGrammarParser.ts`) demonstrating how non-terminals derive terminals:
 
 $$\begin{aligned}
@@ -169,16 +167,16 @@ $$\begin{aligned}
 \text{Factor} &\to \text{NUMBER} \mid \text{IDENTIFIER} \mid ( \text{Expression} )
 \end{aligned}$$
 
-*Note:* This teaching grammar is distinct from the full Python language grammar (which Python 3.10+ parses via PEG). It serves as a visual playground for parse trees, derivations, and precedence hierarchies.
+> **Note:** This teaching grammar is distinct from the full Python language grammar (which Python 3.10+ parses via PEG). It serves as an interactive educational playground for parse trees, derivations, and precedence hierarchies.
 
 ### 3. Parse Trees & Leftmost Derivations
 - **Lexer Token Stream:** Converts input characters into typed terminal tokens (`NUMBER`, `IDENTIFIER`, `PLUS`, etc.).
 - **Recursive-Descent CST:** Builds hierarchical concrete syntax tree nodes.
-- **Leftmost Derivation:** Step-by-step substitution of the leftmost non-terminal variable until only terminals remain.
+- **Leftmost Derivation:** Demonstrates step-by-step substitution of the leftmost non-terminal variable until only terminals remain.
 
 ---
 
-## Supported Repair Categories & Scope
+## Supported Repair Categories & Boundaries
 
 | Category | Typical Error Pattern | Applied Rule | Repair Strategy |
 |---|---|---|---|
@@ -217,40 +215,6 @@ $$\text{Score} = \text{EditMinimality}\,(45\%) + \text{LocationProximity}\,(25\%
 
 ---
 
-## Example Walkthrough
-
-### Scenario: Unclosed Parenthesis in Arithmetic Expression
-
-#### 1. Input Code
-```python
-total = (price + tax
-```
-
-#### 2. Compiler Diagnostic
-```json
-{
-  "parseSuccess": false,
-  "category": "missing_delimiter",
-  "line": 1,
-  "column": 9,
-  "message": "'(' was never closed",
-  "expectedTokens": [")"],
-  "automaticRepairEligible": true
-}
-```
-
-#### 3. Bounded Candidate Generation & Hard Validation
-- **Candidate A:** `total = (price + tax)` $\to$ `ast.parse` **PASSED** (Valid)
-- **Candidate B:** `total = (price + tax]` $\to$ `ast.parse` **REJECTED** (SyntaxError)
-
-#### 4. Deterministic Scoring Output
-- **Token Edit Distance:** $1$ edit (`INSERT ')'`)
-- **Diagnostic Proximity:** Offset matches diagnostic site ($25/25$)
-- **Preservation Ratio:** $100\%$ original tokens preserved ($20/20$)
-- **Total Score:** $90.0 / 100$
-
----
-
 ## Technology Stack
 
 ### Frontend
@@ -267,6 +231,138 @@ total = (price + tax
 - **Parser Engine:** [Python 3.10+](https://www.python.org/) standard library (`ast.parse`, `tokenize.tokenize`, `compile`)
 - **AI Explanation Service:** [Google GenAI SDK](https://github.com/google-gemini/deprecations) (`@google/genai` with Gemini 3.8 Flash)
 - **Unit Testing:** [Vitest](https://vitest.dev/)
+
+---
+
+## Installation and Setup
+
+### Prerequisites
+- **Node.js:** `>= 18.0.0` (Tested with Node v20 / v24)
+- **Python:** `>= 3.10.0` (Must be available in system `PATH` as `python` or `python3`)
+- **Package Manager:** `npm`
+
+### 1. Clone Repository
+```bash
+git clone https://github.com/hackChinmay/GrammerGuard.git
+cd GrammerGuard
+```
+
+### 2. Install Dependencies
+```bash
+npm install --legacy-peer-deps
+```
+
+### 3. Configure Environment
+Create a `.env` file from `.env.example`:
+```bash
+cp .env.example .env
+```
+*(Optional: Set `GEMINI_API_KEY` for AI explanations. If omitted, the deterministic rule-based explainer activates automatically).*
+
+### 4. Start Development Server
+```bash
+npm run dev
+```
+The application will be live at: **`http://localhost:3000`** (Express backend + Vite client).
+
+### 5. Production Build
+```bash
+npm run build
+npm start
+```
+
+---
+
+## Configuration
+
+GrammarGuard AI uses server-side environment variables loaded exclusively on the Express backend:
+
+| Variable | Required | Default | Description |
+|---|---|---|---|
+| `GEMINI_API_KEY` | Optional | `""` | Google Gemini API key for pedagogical explanations. Falls back to rule-based engine if omitted. |
+| `PORT` | Optional | `3000` | Port for the Express backend & dev server. |
+| `NODE_ENV` | Optional | `development` | Environment mode (`development` or `production`). |
+
+---
+
+## Usage Example
+
+### 1. Input Code (Syntax Error)
+```python
+total = (price + tax
+```
+
+### 2. Compiler Diagnostic
+```json
+{
+  "parseSuccess": false,
+  "category": "missing_delimiter",
+  "line": 1,
+  "column": 9,
+  "message": "'(' was never closed",
+  "expectedTokens": [")"],
+  "automaticRepairEligible": true
+}
+```
+
+### 3. Generated Candidates & Independent Validation
+- **Candidate 1:** `total = (price + tax)` &rarr; `ast.parse` **PASSED** (Syntax Valid)
+- **Candidate 2:** `total = (price + tax]` &rarr; `ast.parse` **REJECTED** (SyntaxError)
+
+### 4. Deterministic Scoring Output
+- **Token Edit Distance:** 1 edit (`INSERT ')'`)
+- **Diagnostic Proximity:** Offset matches error location ($25/25$)
+- **Preservation Ratio:** $100\%$ original tokens preserved ($20/20$)
+- **Total Score:** $90.0 / 100$
+
+---
+
+## Testing and Evaluation
+
+### Automated Unit Test Suite
+GrammarGuard AI includes automated test coverage with **Vitest** testing the Python parser adapter, candidate repair generation, delimiter repairs, separator insertions, incomplete expressions, and the teaching grammar parser:
+
+```bash
+# Run unit tests
+npm test
+
+# Run TypeScript type check
+npm run lint
+```
+
+### Evaluation Lab & Benchmark Suite
+The backend includes a reproducible benchmark runner (`backend/evaluation/benchmarkSuite.ts`) that executes empirical evaluations across curated canonical syntax errors, synthetic cases, and negative controls.
+
+The suite calculates:
+- **Repair Success Rate (%):** Percentage of eligible cases where the top-ranked repair matches the intended syntax repair.
+- **False-Positive Resistance (%):** Percentage of valid Python inputs correctly left unedited (0% modifications on valid programs).
+- **Candidate Rejection Rate (%):** Percentage of generated candidate drafts rejected by `ast.parse`.
+- **Candidate Syntax-Validation Rate (%):** Percentage of generated candidate drafts passing independent compilation.
+- **Average Token Edit Cost:** Mean token-level Levenshtein distance across valid repairs.
+- **Top-1 Usefulness (%):** Accuracy of the rank #1 candidate matching the intended repair.
+
+You can trigger and visualize benchmark metrics directly from the **Evaluation Lab** view in the UI or via `POST /api/evaluate`.
+
+---
+
+## Application Views Overview
+
+- **Code Workspace (`/workspace`):** Full Monaco code editor with real-time parser execution, diagnostic badge inspector, side-by-side diff modal, and one-click fix application.
+- **Grammar Explorer (`/grammar`):** Interactive Theory of Computation laboratory with live AST parse trees, leftmost derivations, token tables, and grammar rule explanations.
+- **Evaluation Lab (`/evaluation`):** Empirical benchmark suite dashboard with Recharts visualizations, category success breakdowns, and individual case results.
+- **Analysis History (`/history`):** Session history with JSON export, cryptographic hash auditing, and session restoration.
+- **Settings & Environment (`/settings`):** Privacy mode toggles, candidate search space bounds (1 to 10), and explainer configuration.
+
+---
+
+## Verification Boundaries & Limitations
+
+1. **Syntax vs. Semantics:**  
+   Passing compiler validation proves grammatical membership ($P \in L(G)$); it does not prove algorithmic correctness or execution satisfaction ($P \models \text{Spec}$).
+2. **Localized Error Scope:**  
+   Candidate generation is bounded to single-site delimiter balance, missing separators, and dangling operators. High-entropy syntax mismatches (e.g., arbitrarily scrambled block indentation) are withheld.
+3. **Zero Dynamic Execution:**  
+   The platform intentionally does not execute user code at runtime. Verification is strictly static AST analysis.
 
 ---
 
@@ -324,128 +420,7 @@ grammarguard/
 
 ---
 
-## Installation and Setup
-
-### Prerequisites
-- **Node.js:** `>= 18.0.0` (Tested with Node v20/v24)
-- **Python:** `>= 3.10.0` (Must be available in system `PATH` as `python` or `python3`)
-- **Package Manager:** `npm`
-
-### 1. Clone Repository
-```bash
-git clone https://github.com/hackChinmay/GrammerGuard.git
-cd GrammerGuard
-```
-
-### 2. Install Dependencies
-```bash
-npm install --legacy-peer-deps
-```
-
-### 3. Configure Environment
-Create a `.env` file from `.env.example`:
-```bash
-cp .env.example .env
-```
-*(Optional: Add your `GEMINI_API_KEY` to enable AI explanations. If left unset, GrammarGuard automatically uses the deterministic rule-based explainer).*
-
-### 4. Start Development Server
-```bash
-npm run dev
-```
-The application will be live at: **`http://localhost:3000`** (Express backend + Vite client).
-
-### 5. Build for Production
-```bash
-npm run build
-npm start
-```
-
----
-
-## Configuration
-
-GrammarGuard AI uses server-side environment variables loaded exclusively on the Express backend:
-
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `GEMINI_API_KEY` | Optional | `""` | Google Gemini API key for pedagogical explanations. Falls back to rule-based engine if omitted. |
-| `PORT` | Optional | `3000` | Port for the Express backend & dev server. |
-| `NODE_ENV` | Optional | `development` | Environment mode (`development` or `production`). |
-
-> [!NOTE]
-> Never commit `.env` containing live secrets to version control. The `.gitignore` file is configured to exclude all `.env*` files except `.env.example`.
-
----
-
-## Testing and Evaluation
-
-### Automated Unit Test Suite
-GrammarGuard AI includes automated test coverage with **Vitest** testing the Python parser adapter, candidate repair generation, delimiter repairs, separator insertions, incomplete expressions, and the teaching grammar parser:
-
-```bash
-# Run unit tests
-npm test
-
-# Run TypeScript type check
-npm run lint
-```
-
-### Evaluation Lab & Benchmark Suite
-The backend includes a reproducible benchmark runner (`backend/evaluation/benchmarkSuite.ts`) that executes empirical evaluations across curated canonical syntax errors, synthetic cases, and negative controls.
-
-The suite calculates:
-- **Repair Success Rate (%):** Percentage of eligible cases where the top-ranked repair matches the intended syntax repair.
-- **False-Positive Resistance (%):** Percentage of valid Python inputs correctly left unedited ($0\%$ modifications on valid programs).
-- **Candidate Rejection Rate (%):** Percentage of generated candidate drafts rejected by `ast.parse`.
-- **Candidate Syntax-Validation Rate (%):** Percentage of generated candidate drafts passing independent compilation.
-- **Average Token Edit Cost:** Mean token-level Levenshtein distance across valid repairs.
-- **Top-1 Usefulness (%):** Accuracy of the rank #1 candidate matching the intended repair.
-
-You can trigger and visualize live benchmark metrics directly from the **Evaluation Lab** tab in the UI or via `POST /api/evaluate`.
-
----
-
-## Application Preview & Views
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                             GrammarGuard AI                                 │
-├──────────────┬──────────────────────────────────────────────────────────────┤
-│  Navigation  │ View Content                                                 │
-│              │                                                              │
-│  [Workspace] │ ┌─────────────────────────────┬────────────────────────────┐ │
-│  [Explorer]  │ │ Monaco Code Editor          │ Diagnostic Inspector       │ │
-│  [Eval Lab]  │ │                             ├────────────────────────────┤ │
-│  [History]   │ │ total = (price + tax        │ Top Ranked Candidates      │ │
-│  [Settings]  │ │                             │ [1] total = (price + tax)  │ │
-│              │ └─────────────────────────────┴────────────────────────────┘ │
-└──────────────┴──────────────────────────────────────────────────────────────┘
-```
-
-### Workspace Navigation Views
-1. **Code Workspace (`/workspace`):** Full Monaco code editor with real-time parser execution, diagnostic badge inspector, side-by-side diff modal, and one-click fix application.
-2. **Grammar Explorer (`/grammar`):** Interactive Theory of Computation laboratory with live AST parse trees, leftmost derivations, token tables, and grammar rule explanations.
-3. **Evaluation Lab (`/evaluation`):** Empirical benchmark suite dashboard with Recharts visualizations, category success breakdowns, and individual case results.
-4. **Analysis History (`/history`):** Session history with JSON export, cryptographic hash auditing, and session restoration.
-5. **Settings & Environment (`/settings`):** Privacy mode toggles, candidate search space bounds ($1$ to $10$), and explainer configuration.
-
----
-
-## Verification Boundaries & Limitations
-
-GrammarGuard AI maintains transparent boundaries regarding its capabilities:
-
-1. **Syntax vs. Semantics:**  
-   Passing compiler validation proves grammatical membership ($P \in L(G)$); it does not prove algorithmic correctness or execution satisfaction ($P \models \text{Spec}$).
-2. **Localized Error Scope:**  
-   Candidate generation is bounded to single-site delimiter balance, missing separators, and dangling operators. High-entropy syntax mismatches (e.g., arbitrarily scrambled block indentation) are withheld.
-3. **Zero Dynamic Execution:**  
-   The platform intentionally does not execute user code at runtime. Verification is strictly static AST analysis.
-
----
-
-## Roadmap & Future Scope
+## Roadmap & Future Improvements
 
 - [ ] **Multi-line Block Scope Balancing:** Support for multi-line block delimiter repairs (`try/except`, `with`, unclosed triple-quoted docstrings).
 - [ ] **Extended Language Frontends:** Formal grammar adapters for JavaScript/TypeScript (via Babel/SWC) and Rust.
