@@ -1,0 +1,6 @@
+{
+  "name": "GrammerGuard",
+  "description": "Grammar-Constrained Program Repair and Verification for Python with deterministic ranking, independent parser validation, and Theory of Computation exploration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
