@@ -49,6 +49,7 @@ Traditional LLM coding assistants generate program repairs through **unconstrain
 - [Supported Repair Categories & Boundaries](#supported-repair-categories--boundaries)
 - [Deterministic Ranking Formula](#deterministic-ranking-formula)
 - [Technology Stack](#technology-stack)
+- [Quick Start: How to Run the Project](#quick-start-how-to-run-the-project)
 - [Installation and Setup](#installation-and-setup)
 - [Configuration](#configuration)
 - [Usage Example](#usage-example)
@@ -234,38 +235,64 @@ $$\text{Score} = \text{EditMinimality}\,(45\%) + \text{LocationProximity}\,(25\%
 
 ---
 
+## Quick Start: How to Run the Project
+
+Run these 3 commands in your terminal (PowerShell, Command Prompt, or Bash) to get GrammarGuard up and running immediately:
+
+```bash
+# Step 1: Install all project dependencies
+npm install --legacy-peer-deps
+
+# Step 2: Build client assets with Vite
+npm run build
+
+# Step 3: Start the full-stack server (Express backend + Python parser + Vite frontend)
+npm run dev
+```
+
+Once started, navigate to **`http://localhost:3000`** in your browser.
+
+---
+
 ## Installation and Setup
 
 ### Prerequisites
-- **Node.js:** `>= 18.0.0` (Tested with Node v20 / v24)
+- **Node.js:** `>= 18.0.0` (Tested on Node v20 / v24)
 - **Python:** `>= 3.10.0` (Must be available in system `PATH` as `python` or `python3`)
 - **Package Manager:** `npm`
 
-### 1. Clone Repository
+### Step-by-Step Instructions
+
+#### 1. Clone Repository
 ```bash
 git clone https://github.com/hackChinmay/GrammerGuard.git
 cd GrammerGuard
 ```
 
-### 2. Install Dependencies
+#### 2. Install Dependencies
 ```bash
 npm install --legacy-peer-deps
 ```
 
-### 3. Configure Environment
+#### 3. Build Client Bundle
+```bash
+npm run build
+```
+
+#### 4. Configure Environment (Optional)
 Create a `.env` file from `.env.example`:
 ```bash
 cp .env.example .env
 ```
 *(Optional: Set `GEMINI_API_KEY` for AI explanations. If omitted, the deterministic rule-based explainer activates automatically).*
 
-### 4. Start Development Server
+#### 5. Launch Application
 ```bash
 npm run dev
 ```
-The application will be live at: **`http://localhost:3000`** (Express backend + Vite client).
+The application will be live at: **`http://localhost:3000`** (Express backend + Vite client + Python parser worker).
 
-### 5. Production Build
+#### Production Run (Optional)
 ```bash
 npm run build
 npm start
