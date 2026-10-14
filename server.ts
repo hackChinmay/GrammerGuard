@@ -188,8 +188,9 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`GrammerGuard Server is running at http://0.0.0.0:${PORT}`);
+  const HOST = process.env.HOST || "localhost";
+  app.listen(PORT, HOST, () => {
+    console.log(`GrammerGuard Server is running at http://${HOST}:${PORT}`);
   });
 }
 
